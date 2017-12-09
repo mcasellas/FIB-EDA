@@ -4,15 +4,53 @@ using namespace std;
 
 typedef vector< vector<int > > Graph;
 
-void entrar_elements(Graph& g){
+void entrar_elements(Graph& g, int n, int m){
+    
+    g = Graph (n);
+    
     int x, y;
-    cin >> x >> y;
-    g[x][y] = 1;
+    for (int j = 0; j < m; j++) {
+        cin >> x >> y;
+        g[x].push_back(y);
+        g[y].push_back(x);
+    }
 }
 
-bool es_bosc(int n, int m){
-    if (m > n-1) return false;
-    else return true;
+void buscar_cicles (const Graph& g, vector<bool>& visitats, int i, int antecessor, bool& cicle) {
+    if (!visitats[i]) {
+        visitats[i] = true;
+        
+        for (int j = 0; j < g[i].size(); j++){ // Adjacents de cada node
+            if (g[i][j] != antecessor){ // Diferent del node de partida
+                buscar_cicles(g, visitats, g[i][j], i, cicle);
+                if (cicle) return;
+            }
+        }
+    }
+    
+    else cicle = true;
+}
+
+void dfs(const Graph& g){
+    
+    vector<bool> visitats(g.size(), false); // Graf de nodes visitats
+    
+    int narbres = 0; // nº arbres trobats
+    
+    for (int i = 0; i < g.size(); i++){ // Anem visitant node a node
+        if (!visitats[i]) {
+            bool cicle = false;
+            buscar_cicles(g, visitats, i, i, cicle);
+            
+            if (cicle) {
+                cout << "no" << endl;
+                return;
+            }
+            
+            else ++narbres;
+        }
+    }
+    cout << narbres << endl;
 }
 
 int main(){
@@ -20,17 +58,11 @@ int main(){
     int n, m;
     
     while(cin >> n >> m){
-        
         Graph g (n, vector<int> (n,0));
         
-        for (int i = 0; i < m; i++) { // entrem les arestes
-            entrar_elements(g);
-        }
+        entrar_elements(g,n,m);
         
-        int ret = es_bosc(n,m);
-        
-        if (ret == -1) cout << "no" << endl;
-        else cout << "si" << endl;
+        dfs(g);
     }
     
 }
